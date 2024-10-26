@@ -1,89 +1,84 @@
-from flask import Blueprint, request, jsonify
-import server_properties
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel
 from service import maps_service
+import server_properties
 
 import logger
 
 log = logger.get_logger()
 
 api_key = server_properties.GOOGLE_API_KEY
-maps_controller = Blueprint('maps_controller', __name__,url_prefix='/maps')
+maps_controller = APIRouter(prefix="/maps")
 
+# Request body models
+class LocationRequest(BaseModel):
+    location: str
+    radius: int = 5000
+    keyword: str = "restaurant"
 
-@maps_controller.route('/nearby_restaurants', methods=['POST'])
-def nearby_restaurants():
-    data = request.get_json()
-    location = data.get('location')
-    radius = int(data.get('radius', 5000))
-    keyword = data.get('keyword', 'restaurant')
-    log.info(f"Finding restaurants near {location}...")
+class CoordinatesRequest(BaseModel):
+    latitude: float
+    longitude: float
 
-    if not location:
-        return jsonify({'error': 'Location is required.'}), 400
-    restaurants = maps_service.find_nearby_restaurants(api_key, location, radius, keyword)
-    if restaurants:
-        return jsonify({'restaurants': restaurants}), 200
-    else:
-        return jsonify({'message': 'No restaurants found.'}), 200
+@maps_controller.post("/nearby_restaurants")
+async def nearby_restaurants(request: Request, data: LocationRequest):
+    log.info(f"Finding restaurants near {data.location}...")
+    if not data.location:
+        raise HTTPException(status_code=400, detail="Location is required.")
     
+    restaurants = maps_service.find_nearby_restaurants(api_key, data.location, data.radius, data.keyword)
+    if restaurants:
+        return {"restaurants": restaurants}
+    else:
+        return {"message": "No restaurants found."}
 
-@maps_controller.route('/get_lat_long', methods=['POST'])
-def get_latitude_longitude():
+@maps_controller.post("/get_lat_long")
+async def get_latitude_longitude(data: LocationRequest):
     log.info("Getting latitude and longitude...")
-    data = request.get_json()
-    location = data.get('location')
+    if not data.location:
+        raise HTTPException(status_code=400, detail="Location is required.")
 
-    if not location:
-        return jsonify({'error': 'Location is required.'}), 400
-
-    latitude, longitude = maps_service.get_lat_long(location)
-    log.info(f"Got the latitude and longitude for {location}: {latitude}, {longitude}")
+    latitude, longitude = maps_service.get_lat_long(data.location)
+    log.info(f"Got the latitude and longitude for {data.location}: {latitude}, {longitude}")
 
     if latitude is not None and longitude is not None:
-        return jsonify({
-            'location': location,
+        return {
+            'location': data.location,
             'latitude': latitude,
             'longitude': longitude
-        }), 200
+        }
     else:
-        return jsonify({'error': 'Could not find latitude and longitude for the specified location.'}), 404
+        raise HTTPException(status_code=404, detail="Could not find latitude and longitude for the specified location.")
 
-
-@maps_controller.route('/restaurant_details/<string:restaurant_id>', methods=['GET'])
-def restaurant_details(restaurant_id):
+@maps_controller.get("/restaurant_details/{restaurant_id}")
+async def restaurant_details(restaurant_id: str):
     log.info(f"Fetching details for restaurant ID: {restaurant_id}...")
     try:
         details = maps_service.get_restaurant_details(api_key, restaurant_id)
-        return jsonify({'details': details}), 200
+        return {'details': details}
     except Exception as e:
         log.error(f"Error fetching restaurant details: {e}")
-        return jsonify({'error': 'Failed to fetch restaurant details.'}), 500
+        raise HTTPException(status_code=500, detail="Failed to fetch restaurant details.")
 
-
-@maps_controller.route('/reverse_geocode', methods=['POST'])
-def reverse_geocode():
+@maps_controller.post("/reverse_geocode")
+async def reverse_geocode(data: CoordinatesRequest):
     log.info("Performing reverse geocoding...")
-    data = request.get_json()
-    latitude = data.get('latitude')
-    longitude = data.get('longitude')
-
-    if not latitude or not longitude:
-        return jsonify({'error': 'Latitude and longitude are required.'}), 400
+    if not data.latitude or not data.longitude:
+        raise HTTPException(status_code=400, detail="Latitude and longitude are required.")
 
     try:
-        location = maps_service.reverse_geocode(latitude, longitude)
-        return jsonify({'location': location}), 200
+        location = maps_service.reverse_geocode(data.latitude, data.longitude)
+        return {'location': location}
     except Exception as e:
         log.error(f"Error in reverse geocoding: {e}")
-        return jsonify({'error': 'Failed to find location for the specified coordinates.'}), 500
+        raise HTTPException(status_code=500, detail="Failed to find location for the specified coordinates.")
 
-
-@maps_controller.route('/restaurant_reviews/<string:restaurant_id>', methods=['GET'])
-def restaurant_reviews(restaurant_id):
+@maps_controller.get("/restaurant_reviews/{restaurant_id}")
+async def restaurant_reviews(restaurant_id: str):
     log.info(f"Fetching reviews for restaurant ID: {restaurant_id}...")
     try:
         reviews = maps_service.get_restaurant_reviews(api_key, restaurant_id)
-        return jsonify({'reviews': reviews}), 200
+        return {'reviews': reviews}
     except Exception as e:
         log.error(f"Error fetching reviews: {e}")
-        return jsonify({'error': 'Failed to fetch reviews for the restaurant.'}), 500
+        raise HTTPException(status_code=500, detail="Failed to fetch reviews for the restaurant.")
