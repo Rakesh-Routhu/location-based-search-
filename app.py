@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from controller.maps_controller import maps_controller  # Make sure this import is compatible with FastAPI
+from controller.user_controller import user_controller
 
 app = FastAPI()
 
@@ -15,6 +16,7 @@ app.add_middleware(
 
 # Register the maps controller router
 app.include_router(maps_controller)
+app.include_router(user_controller)
 
 if __name__ == '__main__':
     import uvicorn
