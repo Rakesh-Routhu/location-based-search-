@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from typing import Dict, Optional
+from typing import Optional
 from service.user_service import UserService
 
 # Create router
@@ -11,16 +11,14 @@ class SignupModel(BaseModel):
     username: str
     password: str
     email: str
-    address: str
-    phone: str
 
 class LoginModel(BaseModel):
     email: str
     password: str
 
 class UpdateModel(BaseModel):
-    username: str
-    email: Optional[str] = None
+
+    username: Optional[str] = None
     password: Optional[str] = None
 
 # Dependency to use the service
@@ -30,7 +28,7 @@ user_service = UserService()
 async def signup(user: SignupModel):
     result = user_service.signup(user.username, user.password, user.email)
     if result.get("success"):
-        return {"message": "User signed up successfully"}
+        return {"message": "Signup successful", "user-id": result.get("user_id")}
     else:
         raise HTTPException(status_code=400, detail=result.get("error"))
 
@@ -40,11 +38,11 @@ async def login(user: LoginModel):
     if result.get("success"):
         return {"message": "Login successful", "token": result.get("token")}
     else:
-        raise HTTPException(status_code=401, detail="Invalid username or password")
+        raise HTTPException(status_code=401, detail=result.get("error"))
 
 @user_controller.put("/update")
-async def update(user: UpdateModel):
-    result = user_service.update_user(user.username, user.email, user.password)
+async def update(user: UpdateModel, user_id: str):
+    result = user_service.update_user(user_id, user.username, user.password)
     if result.get("success"):
         return {"message": "User updated successfully"}
     else:

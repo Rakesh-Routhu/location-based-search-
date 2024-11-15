@@ -6,3 +6,6 @@ fastapi
 uvicorn
 pytest
 httpx
+elasticsearch
+bcrypt
+PyJWT

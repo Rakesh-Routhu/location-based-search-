@@ -14,3 +14,8 @@ def get_env_variable(var_name):
 GOOGLE_API_KEY = get_env_variable('GOOGLE_API_KEY')
 GOOGLE_PLACES_API_BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
 GOOGLE_GEOCODE_API_BASE_URL = 'https://maps.googleapis.com/maps/api/geocode/json'
+ES_HOST = get_env_variable('ES_HOST')
+ES_USER = get_env_variable('ES_USERNAME')
+ES_PASSWORD = get_env_variable('ES_PASSWORD')
+SECRET_KEY = get_env_variable('SECRET_KEY')
+ALGORITHM = get_env_variable('ALGORITHM')
