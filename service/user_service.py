@@ -6,6 +6,7 @@ import jwt
 from elasticsearch import Elasticsearch
 import server_properties
 import logging
+from helper import notification
 
 log = logging.getLogger(__name__)
 
@@ -84,6 +85,12 @@ class UserService:
 
         # Index the user document in Elasticsearch
         self.es.index(index=self.index, document=user_data)
+
+        # Send welcome notification
+        subject = "Welcome! Your Guide to Local Restaurants is Here!"
+        body = f"Hello {username},\n\nThank you for signing up! We're excited to have you on board."
+        print("subject",subject,"body ",body)
+        notification.send_notification(subject,body,email)  # Calling the function from notification.py
 
         # Return success with user_id and JWT token
         return {"success": True, "user_id": user_data["user_id"], "token": create_access_token(user_data["user_id"])}

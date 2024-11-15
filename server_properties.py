@@ -19,3 +19,10 @@ ES_USER = get_env_variable('ES_USERNAME')
 ES_PASSWORD = get_env_variable('ES_PASSWORD')
 SECRET_KEY = get_env_variable('SECRET_KEY')
 ALGORITHM = get_env_variable('ALGORITHM')
+# Email configuration
+MAIL_HOST = 'smtp.gmail.com'
+MAIL_PORT = 587
+MAIL_USERNAME = get_env_variable('MAIL_USERNAME')  # Replace with your method of securely getting the email
+MAIL_PASSWORD = get_env_variable('MAIL_PASSWORD')  # Replace with your method of securely getting the password
+MAIL_USE_TLS = True
+MAIL_USE_AUTH = True
