@@ -19,6 +19,6 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}  # JSON object with client-id, client-secret, tenant-id, subscription-id
 
       - name: 'Run deployment'
-        run: |
-          az group create --name <ResourceGroup> --location <Location>
-          az deployment group create --resource-group <ResourceGroup> --template-file <YourTemplate>.json
+  run: |
+    az group create --name location-backend_group --location "Central US"
+    az deployment group create --resource-group location-backend_group --template-file myTemplate.json
