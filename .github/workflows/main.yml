@@ -21,7 +21,8 @@ jobs:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        azure-cloud: azurecloud
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        auth-type: SERVICE_PRINCIPAL
 
     # Run the deployment script or commands
     - name: 'Run deployment'
