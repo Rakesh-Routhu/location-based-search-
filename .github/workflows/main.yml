@@ -3,22 +3,32 @@ name: Deploy to Azure
 on:
   push:
     branches:
-      - main
+      - main  # Or your branch to trigger the deployment
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 'Checkout GitHub Actions'
-        uses: actions/checkout@v3
+    # Checkout code from the repository
+    - name: 'Checkout GitHub Actions'
+      uses: actions/checkout@v3
 
-      - name: 'Login to Azure'
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}  # JSON object with client-id, client-secret, tenant-id, subscription-id
+    # Login to Azure using Azure/login
+    - name: 'Login to Azure'
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        auth-type: SERVICE_PRINCIPAL
 
-      - name: 'Run deployment'
-  run: |
-    az group create --name location-backend_group --location "Central US"
-    az deployment group create --resource-group location-backend_group --template-file myTemplate.json
+    # Run deployment commands
+    - name: 'Run deployment'
+      run: |
+        az group create --name location-backend_group --location "Central US"
+        az deployment group create --resource-group location-backend_group --template-file myTemplate.json
+
+permissions:
+  id-token: write
