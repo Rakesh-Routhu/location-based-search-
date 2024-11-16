@@ -13,7 +13,7 @@ jobs:
     - name: 'Checkout code'
       uses: actions/checkout@v3
 
-    - name: 'Login to Azure'
+    - name: 'Login to Azure' #login
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}  # JSON object with client-id, client-secret, tenant-id, subscription-id
