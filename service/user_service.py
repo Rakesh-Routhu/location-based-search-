@@ -115,11 +115,17 @@ class UserService:
             return {"success": False, "error": "User not found"}
 
         user_data = res['hits']['hits'][0]['_source']
+        result = {
+            "user_id":user_data["user_id"],
+            "email":user_data["email"],
+            "username":user_data["username"]
+        }
+        log.info(f"result {result}")
 
         # Verify the password against the stored hash
         if verify_password(user_data['password'], password):
             token = create_access_token(user_data["user_id"])
-            return {"success": True, "user_id": user_data["user_id"], "token": token}
+            return {"success": True, "result": result, "token": token}
 
         return {"success": False, "error": "Invalid credentials"}
 
